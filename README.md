@@ -1,5 +1,7 @@
 # BS Price Lens
 
+[Open the website](https://15016199811s11087-afk.github.io/bs-price-lens/)
+
 Made by **issac xiao**
 
 **Design Thinking Project 2**
