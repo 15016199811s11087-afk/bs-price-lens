@@ -1,0 +1,62 @@
+[
+  {
+    "id": "beehive",
+    "name": "皇巢卡店 Beehive",
+    "region": "HK",
+    "currency": "HKD",
+    "url": "https://beehivetcg.com",
+    "searchUrlTemplate": "https://beehivetcg.com/search?q={cardNumber}&type=product",
+    "mode": "live",
+    "description": "香港單卡店，公開商品售價及網店供應狀態。"
+  },
+  {
+    "id": "overtime",
+    "name": "OverTime TCG",
+    "region": "HK",
+    "currency": "HKD",
+    "url": "https://ottcg.hk",
+    "searchUrlTemplate": "https://ottcg.hk/product/search?q={cardNumber}",
+    "mode": "live",
+    "description": "香港單卡店，公開商品售價及售罄標示。"
+  },
+  {
+    "id": "cardrush",
+    "name": "Cardrush カードラッシュ",
+    "region": "JP",
+    "currency": "JPY",
+    "url": "https://www.cardrush-bs.jp",
+    "searchUrlTemplate": "https://www.cardrush-bs.jp/product-list?keyword={cardNumber}&num=100",
+    "mode": "live",
+    "description": "日本參考價，保留店方卡況及 SECRET 版本標示。"
+  },
+  {
+    "id": "fullahead",
+    "name": "Fullahead フルアヘッド",
+    "region": "JP",
+    "currency": "JPY",
+    "url": "https://fullahead-tcg.com",
+    "searchUrlTemplate": "https://fullahead-tcg.com/shop/shopbrand.html?search={cardNumber}",
+    "mode": "live",
+    "description": "日本參考價，保留瑕疵卡及 SECRET 版本標示。"
+  },
+  {
+    "id": "battlephase",
+    "name": "BATTLE PHASE",
+    "region": "HK",
+    "currency": "HKD",
+    "url": "https://www.bptcg.hk/categories/bs-original-secret",
+    "searchUrlTemplate": "https://www.bptcg.hk/products?query={cardNumber}",
+    "mode": "search",
+    "description": "前往卡店搜尋。此來源未接入自動報價，搜尋連結不代表有貨。"
+  },
+  {
+    "id": "mycard113",
+    "name": "MyCard 113",
+    "region": "HK",
+    "currency": "HKD",
+    "url": "https://www.mycard113hk.com/pages/battle-spirits",
+    "searchUrlTemplate": "https://www.mycard113hk.com/products?query={cardNumber}",
+    "mode": "search",
+    "description": "前往卡店搜尋。此來源未接入自動報價，搜尋連結不代表有貨。"
+  }
+]
