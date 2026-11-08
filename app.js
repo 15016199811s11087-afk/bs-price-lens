@@ -6,7 +6,7 @@ async function loadConfiguration(){const meta=$('meta[name="lens-config"]');if(!
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let lang=localStorage.getItem('lens-language')||'en';
 const l=(en,zh)=>lang==='zh'?zh:en;
-const S={cards:[],raw:[],shops:[],manifest:{},route:'browse',query:'',set:'all',type:'all',rarity:'all',color:'all',page:1,pageSize:30,tab:'all',trades:[],selected:null,offers:null,variant:'all',region:'all',stockOnly:false};
+const S={cards:[],raw:[],shops:[],manifest:{},route:'home',query:'',set:'all',type:'all',rarity:'all',color:'all',page:1,pageSize:30,tab:'all',trades:[],selected:null,offers:null,variant:'all',region:'all',stockOnly:false};
 let groups=new Map(),numbers=new Map(),toastTimer,detailRevision=0;
 const colors={red:'#d76a74',purple:'#9b75ba',green:'#8cae74',white:'#e8e5eb',yellow:'#ddc66c',blue:'#7399bf'};
 const types={'トークンスピリット':'Token Spirit','トークンネクサス':'Token Nexus','スピリット':'Spirit','アルティメット':'Ultimate','ブレイヴ':'Brave','ネクサス':'Nexus','マジック':'Magic','契約スピリット':'Contract Spirit','契約アルティメット':'Contract Ultimate','契約ネクサス':'Contract Nexus','創界神ネクサス':'Grandwalker Nexus'};
@@ -21,48 +21,74 @@ async function api(path,body){const r=await fetch(`${apiBase}/api${path}`,body?{
 function showDialog(html){$('#detail').innerHTML=html;if(!$('#detail').open)$('#detail').showModal();}
 const dialogTop=title=>`<div class="dialog-top"><span>${title}</span><button class="close" data-action="close" aria-label="${l('Close','關閉')}">×</button></div>`;
 function empty(title,text,action=''){return`<div class="empty"><div class="symbol">◇</div><h3>${title}</h3><p>${text}</p>${action}</div>`;}
-function nav(){document.documentElement.lang=lang==='zh'?'zh-Hant':'en';$('#language').textContent=lang==='zh'?'EN':'繁中';$('#navigation').innerHTML=[['browse',l('Card archive','卡牌圖鑑')],['trades',l('Player trades','玩家交換')],['meta',l('Eternal meta','永恆賽制')],['shops',l('Shop directory','卡店指南')]].map(([id,label])=>`<a href="#${id}" class="${S.route===id?'active':''}" ${S.route===id?'aria-current="page"':''}>${label}</a>`).join('');$('#footer').innerHTML=`<div class="footer-identity"><a href="#browse" class="brand"><span class="brand-mark">◈</span><span>BS <b>Price Lens</b></span></a><div class="maker-credit"><strong>Made by issac xiao</strong><span>Design Thinking Project 2</span></div></div><p>${l('Independent student project. Card information and artwork belong to BANDAI and their respective rights holders. Shop listings are asking prices, not completed sales. Prices and availability can change; confirm with the retailer before buying.','獨立學生專題。卡牌資訊及圖片版權屬 BANDAI 及相關權利人。店舖報價為公開叫價，並非成交價；價格及庫存可能變動，購買前請向卡店確認。')}</p>`;}
-function storefront() {
-  const sprite = name => `<img class="store-sprite" src="${assetUrl('assets/pixel/' + name + '.png')}" alt="" width="128" height="128">`;
-  const destinations = [
-    {name: l('Card archive', '卡牌圖鑑'), detail: l('Find a card by name or number.', '按卡名或卡號搵卡。'), tone: 'archive', art: sprite('nova')},
-    {name: l('Player trades', '玩家交換'), detail: l('Find a match for your spares.', '用重複卡換想要嘅卡。'), tone: 'trades', art: sprite('dan')},
-    {name: l('Eternal meta', '永恆賽制'), detail: l('See shop tournament winners.', '睇店賽優勝牌組分布。'), tone: 'meta', art: sprite('light')},
-    {name: l('Shop directory', '卡店指南'), detail: l('Explore HK and Japan shops.', '查看香港同日本卡店。'), tone: 'shops', art: `
-      <span class="store-card-stack" aria-hidden="true">
-        <img src="${assetUrl('assets/cards/BS67/BS67-X01.jpg')}" alt="" width="52" height="73">
-        <img src="${assetUrl('assets/cards/BS68/BS68-CX01.jpg')}" alt="" width="52" height="73">
-      </span>`}
-  ];
-  const tiles = destinations.map(({name, detail, tone, art}) => {
-    const tileClass = `store-tile store-tile--${tone}`;
-    const content = `
-      <span class="store-tile-copy"><strong>${name}</strong><span>${detail}</span></span>
-      ${art}<span class="store-tile-arrow" aria-hidden="true">→</span>`;
-    return tone === 'archive'
-      ? `<button type="button" data-action="find-card" class="${tileClass}">${content}</button>`
-      : `<a href="#${tone}" class="${tileClass}">${content}</a>`;
-  }).join('');
+function nav(){document.documentElement.lang=lang==='zh'?'zh-Hant':'en';$('#language').textContent=lang==='zh'?'EN':'繁中';$('#navigation').innerHTML=[['browse',l('Card archive','卡牌圖鑑')],['trades',l('Player trades','玩家交換')],['meta',l('Eternal meta','永恆賽制')],['shops',l('Shop directory','卡店指南')]].map(([id,label])=>`<a href="#${id}" class="${S.route===id?'active':''}" ${S.route===id?'aria-current="page"':''}>${label}</a>`).join('');$('#footer').innerHTML=`<div class="footer-identity"><a href="#home" class="brand"><span class="brand-mark">◈</span><span>BS <b>Price Lens</b></span></a><div class="maker-credit"><strong>Made by issac xiao</strong><span>Design Thinking Project 2</span></div></div><p>${l('Independent student project. Card information and artwork belong to BANDAI and their respective rights holders. Shop listings are asking prices, not completed sales. Prices and availability can change; confirm with the retailer before buying.','獨立學生專題。卡牌資訊及圖片版權屬 BANDAI 及相關權利人。店舖報價為公開叫價，並非成交價；價格及庫存可能變動，購買前請向卡店確認。')}</p>`;}
+function showcase() {
+  const art = (file, variant, width, height, alt = '') => `
+    <div class="showcase-art showcase-art--${variant}">
+      <img src="${assetUrl('assets/pixel/' + file + '.webp')}" alt="${esc(alt)}" width="${width}" height="${height}"
+        ${variant === 'hero' ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">
+    </div>`;
 
-  return `<section class="storefront">
-    <div class="store-inner">
-      <div class="store-intro">
-        <div class="eyebrow">BATTLE SPIRITS · HONG KONG</div>
-        <h1>BS Price Lens<span>.</span></h1>
-        <p>${l('Find cards, compare prices and trade with other players.', '搵卡、格價，同其他玩家交換。')}</p>
-      </div>
-      <div class="store-tiles" role="group" aria-label="${l('Explore BS Price Lens', '探索 BS Price Lens')}">${tiles}</div>
-      <div class="store-footnote">
-        <span>${Number(S.manifest.uniqueCardNumbers || numbers.size).toLocaleString()} ${l('card numbers', '個卡號')}
-          <span aria-hidden="true">·</span> ${S.manifest.productCount || '—'} ${l('official product lists', '個官方產品清單')}
-          <span aria-hidden="true">·</span> ${l('Hong Kong shops first', '香港卡店優先')}</span>
-        <span>${l('AI-generated fan sprites', 'AI 生成迷你角色插圖')}</span>
-      </div>
+  $('#main').innerHTML = `<div class="showcase">
+    <div class="showcase-ribbon">
+      <span>${l('Hong Kong shop listings first, with Japanese references.', '香港卡店優先，日本報價作參考。')}</span>
+      <a href="#shops">${l('See sources', '查看報價來源')} <span aria-hidden="true">›</span></a>
     </div>
-  </section>`;
+    <section class="showcase-hero" aria-labelledby="showcase-title">
+      <div class="showcase-copy">
+        <span class="showcase-eyebrow">BATTLE SPIRITS · HONG KONG</span>
+        <h1 id="showcase-title">BS Price Lens</h1>
+        <p>${l('Find cards. Compare shop prices. Trade with players.', '搵到想要嘅卡，睇清店舖報價。')}</p>
+        <div class="showcase-actions">
+          <a class="showcase-button" href="#browse">${l('Search cards', '查卡格價')}</a>
+          <a class="showcase-button showcase-button--secondary" href="#meta">${l('Explore Eternal', '睇永恆賽制')}</a>
+        </div>
+      </div>
+      ${art('showcase', 'hero', 1480, 740, l('Pixel art of Dan Bashin between a red dragon and a moonlight dragon', '馬神彈、紅金龍同月光龍嘅像素插圖'))}
+    </section>
+    <section class="showcase-panel showcase-panel--meta" aria-labelledby="showcase-meta-title">
+      <div class="showcase-copy">
+        <span class="showcase-eyebrow">ETERNAL FORMAT</span>
+        <h2 id="showcase-meta-title">${l('Eternal deck results', '永恆賽制牌組分布')}</h2>
+        <p>${l('See which archetypes won in the shop tournament sample.', '用互動餅圖睇店賽優勝樣本，了解各副牌組嘅分布。')}</p>
+        <div class="showcase-actions">
+          <a class="showcase-button" href="#meta">${l('Open the chart', '打開餅圖')}</a>
+        </div>
+        <div class="showcase-meta-summary">
+          <span>${l('Ghost Demon', '幽魔')}</span>
+          <span>${l('Moonlight', '月光龍')}</span>
+          <span>${l('Sun', '太陽龍')}</span>
+        </div>
+      </div>
+      ${art('eternal', 'meta', 780, 975)}
+    </section>
+    <div class="showcase-grid">
+      <section class="showcase-panel showcase-panel--trades" aria-labelledby="showcase-trades-title">
+        <div class="showcase-copy">
+          <h2 id="showcase-trades-title">${l('Player trades', '玩家交換')}</h2>
+          <p>${l('Find someone who wants the cards you can offer.', '用手上嘅重複卡，換你想要嘅卡。')}</p>
+          <div class="showcase-actions">
+            <a class="showcase-button" href="#trades">${l('Browse trades', '睇交換帖')}</a>
+          </div>
+        </div>
+        ${art('exchange', 'tile', 920, 613)}
+      </section>
+      <section class="showcase-panel showcase-panel--shops" aria-labelledby="showcase-shops-title">
+        <div class="showcase-copy">
+          <h2 id="showcase-shops-title">${l('Shop directory', '卡店指南')}</h2>
+          <p>${l('Check retailer sources, editions and stock.', '核對卡店來源、卡牌版本同庫存。')}</p>
+          <div class="showcase-actions">
+            <a class="showcase-button" href="#shops">${l('See shops', '睇卡店')}</a>
+          </div>
+        </div>
+        ${art('shops', 'tile', 920, 613)}
+      </section>
+    </div>
+    <p class="showcase-credit">${l('AI-generated fan illustrations for BS Price Lens.', 'BS Price Lens 嘅 AI 生成像素插圖。')}</p>
+  </div>`;
 }
 function filterOptions(values,chosen,label){return`<option value="all">${label}</option>`+values.map(([v,n])=>`<option value="${esc(v)}" ${v===chosen?'selected':''}>${esc(n)}</option>`).join('');}
-function browse(){const sets=[...new Map(S.raw.map(c=>[c.set,c.setName||c.set])).entries()].sort((a,b)=>a[0].localeCompare(b[0],undefined,{numeric:true}));const ts=[...new Set(S.raw.map(c=>c.type).filter(Boolean))].map(t=>[t,typeLabel(t)]);const rs=[...new Set(S.raw.map(c=>c.rarity).filter(Boolean))].sort().map(v=>[v,v]);$('#main').innerHTML=storefront()+`<section class="content" id="archive"><div class="section-head"><div><h2>${l('The card archive','卡牌圖鑑')}</h2><p>${l('Find a card number, discover an edition, check a shop.','由卡號搵卡、分辨版本，再查詢店舖報價。')}</p></div><a class="quiet-link" href="#trades">${l('Looking to swap? Explore trades','想交換？前往玩家交換')} ↗</a></div><label class="search-box"><span class="search-icon">⌕</span><input id="search" type="search" placeholder="${l('Search a card number or name, e.g. BS67-X01','輸入卡號或卡名，例如 BS67-X01')}" value="${esc(S.query)}" aria-label="${l('Search cards','搜尋卡牌')}" autocomplete="off"><span class="search-shortcut">/</span></label><div class="filter-row"><select id="set" aria-label="${l('Product series','卡牌系列')}">${filterOptions(sets.map(([s,n])=>[s,`${s} · ${n}`]),S.set,l('All series','全部系列'))}</select><select id="type" aria-label="${l('Card type','卡牌種類')}">${filterOptions(ts,S.type,l('All card types','全部卡牌種類'))}</select><select id="rarity" aria-label="${l('Rarity','稀有度')}">${filterOptions(rs,S.rarity,l('All rarities','全部稀有度'))}</select><div class="color-filters" aria-label="${l('Filter by colour','按顏色篩選')}">${Object.entries(colors).map(([c,hex])=>`<button class="color-button ${S.color===c?'active':''}" style="--c:${hex}" title="${c[0].toUpperCase()+c.slice(1)}" aria-label="${c}" aria-pressed="${S.color===c}" data-action="color" data-id="${c}"></button>`).join('')}</div><button class="clear-filter" data-action="clear">${l('Reset','重設')}</button></div><div id="results"></div></section>`;renderGrid();$('#search').addEventListener('input',e=>{S.query=e.target.value;S.page=1;renderGrid();});for(const name of['set','type','rarity'])$('#'+name).addEventListener('change',e=>{S[name]=e.target.value;S.page=1;renderGrid();});}
+function browse(){const sets=[...new Map(S.raw.map(c=>[c.set,c.setName||c.set])).entries()].sort((a,b)=>a[0].localeCompare(b[0],undefined,{numeric:true}));const ts=[...new Set(S.raw.map(c=>c.type).filter(Boolean))].map(t=>[t,typeLabel(t)]);const rs=[...new Set(S.raw.map(c=>c.rarity).filter(Boolean))].sort().map(v=>[v,v]);$('#main').innerHTML=`<section class="content archive-content" id="archive"><div class="section-head"><div><h1>${l('The card archive','卡牌圖鑑')}</h1><p>${l('Find a card number, discover an edition, check a shop.','由卡號搵卡、分辨版本，再查詢店舖報價。')}</p></div><a class="quiet-link" href="#trades">${l('Looking to swap? Explore trades','想交換？前往玩家交換')} ↗</a></div><label class="search-box"><span class="search-icon">⌕</span><input id="search" type="search" placeholder="${l('Search a card number or name, e.g. BS67-X01','輸入卡號或卡名，例如 BS67-X01')}" value="${esc(S.query)}" aria-label="${l('Search cards','搜尋卡牌')}" autocomplete="off"><span class="search-shortcut">/</span></label><div class="filter-row"><select id="set" aria-label="${l('Product series','卡牌系列')}">${filterOptions(sets.map(([s,n])=>[s,`${s} · ${n}`]),S.set,l('All series','全部系列'))}</select><select id="type" aria-label="${l('Card type','卡牌種類')}">${filterOptions(ts,S.type,l('All card types','全部卡牌種類'))}</select><select id="rarity" aria-label="${l('Rarity','稀有度')}">${filterOptions(rs,S.rarity,l('All rarities','全部稀有度'))}</select><div class="color-filters" aria-label="${l('Filter by colour','按顏色篩選')}">${Object.entries(colors).map(([c,hex])=>`<button class="color-button ${S.color===c?'active':''}" style="--c:${hex}" title="${c[0].toUpperCase()+c.slice(1)}" aria-label="${c}" aria-pressed="${S.color===c}" data-action="color" data-id="${c}"></button>`).join('')}</div><button class="clear-filter" data-action="clear">${l('Reset','重設')}</button></div><div id="results"></div></section>`;renderGrid();$('#search').addEventListener('input',e=>{S.query=e.target.value;S.page=1;renderGrid();});for(const name of['set','type','rarity'])$('#'+name).addEventListener('change',e=>{S[name]=e.target.value;S.page=1;renderGrid();});}
 function matched(){const q=S.query.trim().normalize('NFKC').toLowerCase().replace(/[‐‑–—]/g,'-');return S.cards.filter(c=>(!q||`${c.cardNumber} ${c.name} ${c.family||''} ${(c.faces||[]).map(f=>f.name+' '+(f.family||'')).join(' ')}`.toLowerCase().includes(q))&&(S.set==='all'||c.printings.some(p=>p.set===S.set))&&(S.type==='all'||c.type===S.type)&&(S.rarity==='all'||c.rarity===S.rarity)&&(S.color==='all'||c.colors?.includes(S.color)));}
 function renderGrid(){const cs=matched();const pages=Math.max(1,Math.ceil(cs.length/S.pageSize));S.page=Math.min(pages,Math.max(1,S.page));const shown=cs.slice((S.page-1)*S.pageSize,S.page*S.pageSize);$('#results').innerHTML=`<div class="result-row"><span><b>${cs.length.toLocaleString()}</b> ${l('artwork / edition entries','款卡圖／版本')} ${S.query?`${l('for','符合')} “${esc(S.query)}”`:''}</span><span>${l('Select a card to compare shop listings','點選卡牌查看店舖報價')}</span></div>`+(shown.length?`<div class="card-grid">${shown.map(c=>`<article class="card-tile"><button class="card-image-wrap" data-action="detail" data-id="${esc(c.id)}" aria-label="${esc(c.cardNumber+' '+c.name)}"><span class="card-fallback">◈</span><img src="${esc(safeUrl(c.image))}" alt="${esc(c.name)}" loading="lazy" width="180" height="252"><span class="card-type-tag">${esc(typeLabel(c.type))}</span></button><div class="card-line"><span class="card-number">${esc(c.cardNumber)}</span><span class="rarity">${esc(c.rarity||'—')}</span></div><h3>${esc(c.name)}</h3><button class="quote-button" data-action="detail" data-id="${esc(c.id)}">${l('Compare shop listings','查看店舖報價')} <span>↗</span></button></article>`).join('')}</div><div class="pagination"><button data-action="page" data-page="1" ${S.page===1?'disabled':''} aria-label="First page">«</button><button data-action="page" data-page="${S.page-1}" ${S.page===1?'disabled':''} aria-label="Previous page">‹</button><span class="page-info">${S.page} / ${pages}</span><button data-action="page" data-page="${S.page+1}" ${S.page===pages?'disabled':''} aria-label="Next page">›</button><button data-action="page" data-page="${pages}" ${S.page===pages?'disabled':''} aria-label="Last page">»</button></div>`:empty(l('No matching cards','未搵到相符卡牌'),l('Try the printed card number or reset a filter. Japanese card names are searchable.','試下卡面印出嘅卡號，或重設篩選。亦可以用日文卡名搜尋。')));}
 async function cardDetail(id){const c=groups.get(id)||numbers.get(id);if(!c)return;S.selected=c;S.offers=null;S.variant='all';S.region='all';S.stockOnly=false;const rev=++detailRevision;showDialog(dialogTop(`CARD DETAILS / ${esc(c.cardNumber)}`)+`<div class="detail-layout"><div class="detail-art"><img id="detail-image" src="${esc(safeUrl(c.image))}" alt="${esc(c.name)}">${c.faces?.length>1?`<button class="button small secondary" style="margin-top:12px" data-action="flip-card" data-side="0">${l('View other side','查看另一面')} ⇄</button>`:''}<small>${l('Official reference artwork. Check the shop listing for the actual edition and condition.','官方卡圖參考。實際版本及卡況以店舖商品頁為準。')}</small></div><div><div class="detail-heading"><div class="eyebrow">${esc(c.cardNumber)} <span class="rarity">${esc(c.rarity||'—')}</span></div><h2 id="detail-card-name">${esc(c.name)}</h2><div class="attribute-tags"><span>${esc(typeLabel(c.type))}</span><span>${esc((c.colors||[]).join(' / ')||l('Colour not listed','未列顏色'))}</span><span>${esc(c.variant||'standard')}</span></div>${c.printings.length>1?`<select class="edition-select" id="printing" aria-label="${l('Printing','收錄版本')}">${c.printings.map((p,i)=>`<option value="${i}">${esc(p.set+' · '+p.setName)}</option>`).join('')}</select>`:''}<a class="quiet-link" href="${esc(safeUrl(c.url))}" target="_blank" rel="noopener noreferrer">${l('Official card information','官方卡牌資料')} ↗</a></div><h3 class="detail-section-title">${l('Shop listings','店舖參考報價')}<small>HONG KONG FIRST</small></h3><p class="quote-explain">${l('Prices are retailer asking prices. Match the edition and condition before comparing. JPY listings exclude currency conversion, shipping and proxy fees.','報價為店舖公開叫價。比較時請核對版本及卡況。日圓報價未含兌換、運費或代購費。')}</p><div class="filter-row" style="padding:0 0 4px"><select id="offer-region" aria-label="Shop region"><option value="all">${l('HK + Japan','香港＋日本')}</option><option value="HK">${l('Hong Kong only','只看香港')}</option><option value="JP">${l('Japan only','只看日本')}</option></select><select id="offer-variant" aria-label="Edition"><option value="all">${l('All listed editions','全部報價版本')}</option><option value="standard">${l('Regular edition','普通版')}</option><option value="parallel">${l('Parallel / SECRET','異畫／SECRET')}</option><option value="special">${l('Special editions','特別版本')}</option></select><label style="font-size:10px;color:#82708f"><input id="stock-only" type="checkbox"> ${l('In stock','有貨')}</label></div><div id="offers"><div class="status-message"><span class="spinner"></span>${l('Checking public shop listings…','查詢店舖公開報價中…')}</div></div><div class="detail-actions"><button class="button" data-action="new-trade" data-have="${esc(c.cardNumber)}">${l('Offer this card for trade','用呢張卡提出交換')} ⇄</button><a href="#trades" class="button secondary" data-action="close">${l('Browse player trades','瀏覽玩家交換')}</a></div></div></div>`);
@@ -218,10 +244,95 @@ function renderEternalMeta(snapshot) {
   select(0);
 }
 
-function route(){const hash=location.hash.slice(1).split('/')[0];S.route=['browse','trades','meta','shops'].includes(hash)?hash:'browse';nav();if(S.route==='browse')browse();else if(S.route==='trades')trades();else if(S.route==='meta')showEternalMeta();else shops();}
-document.addEventListener('click',async e=>{const el=e.target.closest('[data-action]');if(!el||el.disabled)return;const a=el.dataset.action;try{if(a==='flip-card'){const fs=S.selected?.faces||[];const i=(Number(el.dataset.side)+1)%fs.length;el.dataset.side=String(i);$('#detail-image').src=fs[i].image;$('#detail-card-name').textContent=fs[i].name;}else if(a==='close'){$('#detail').close();detailRevision++;}else if(a==='find-card')$('#search').focus();else if(a==='detail')cardDetail(el.dataset.id);else if(a==='color'){S.color=S.color===el.dataset.id?'all':el.dataset.id;S.page=1;browse();}else if(a==='clear'){S.query='';S.set=S.type=S.rarity=S.color='all';S.page=1;browse();}else if(a==='page'){S.page=Number(el.dataset.page);renderGrid();$('#archive').scrollIntoView({behavior:'smooth'});}else if(a==='new-trade')newTrade(el.dataset.have||'');else if(a==='tab'){S.tab=el.dataset.tab;trades();}else if(a==='proposal')propose(el.dataset.id);else if(a==='restore')restore();else if(a==='my-trades'){$('#detail').close();S.tab='mine';if(S.route!=='trades')location.hash='trades';else trades();}else if(a==='reload-trades')trades();else if(a==='close-trade'){if(!confirm(l('Close this trade listing?','確認關閉呢個交換帖？')))return;const k=keys().find(k=>k.id===el.dataset.id);await api(`/trades/${el.dataset.id}/close`,{token:k?.token});trades();}}catch(error){notify(error.message);}});
+let archiveLoad;
+let archiveLoaded = false;
+let routeRevision = 0;
+
+async function loadArchive() {
+  const [raw, manifest, shopsData] = await Promise.all(
+    ['catalogue.json', 'catalogue-manifest.json', 'shops.json'].map(async file => {
+      const response = await fetch(assetUrl('data/' + file));
+      if (!response.ok) throw new Error('Unable to load ' + file);
+      return response.json();
+    })
+  );
+  S.raw = Array.isArray(raw) ? raw : raw.cards;
+  S.manifest = manifest;
+  S.shops = shopsData;
+
+  const index = new Map();
+  for (const card of S.raw) {
+    if (!numbers.has(card.cardNumber)) numbers.set(card.cardNumber, card);
+    const key = card.cardNumber + '|' + card.image;
+    let group = index.get(key);
+    if (!group) {
+      group = {...card, printings: []};
+      index.set(key, group);
+      groups.set(group.id, group);
+    }
+    group.printings.push(card);
+  }
+  const priority = number => /^26R/.test(number) ? 3 : /^BS[0-9]/.test(number) ? 2 : 1;
+  S.cards = [...index.values()].sort((a, b) =>
+    priority(b.cardNumber) - priority(a.cardNumber) ||
+    b.cardNumber.localeCompare(a.cardNumber, undefined, {numeric: true})
+  );
+  archiveLoaded = true;
+}
+
+function archiveError(error) {
+  $('#main').innerHTML = empty(
+    l('The archive could not load', '卡庫暫時未能載入'),
+    l('Please refresh the page to try again.', '請重新整理網頁再試一次。')
+  );
+  console.error(error);
+}
+
+async function route() {
+  const revision = ++routeRevision;
+  const hash = location.hash.slice(1).split('/')[0];
+  S.route = ['browse', 'trades', 'meta', 'shops'].includes(hash) ? hash : 'home';
+  nav();
+  if (S.route === 'home') {
+    showcase();
+    return;
+  }
+  if (S.route === 'meta') {
+    await showEternalMeta();
+    return;
+  }
+
+  if (!archiveLoaded) {
+    $('#main').innerHTML = `<div class="loading-screen"><span class="spinner"></span><p>${l('Opening the card archive…', '載入卡牌圖鑑…')}</p></div>`;
+    try {
+      archiveLoad ||= loadArchive().catch(error => {
+        archiveLoad = undefined;
+        throw error;
+      });
+      await archiveLoad;
+    } catch (error) {
+      if (revision === routeRevision) archiveError(error);
+      return;
+    }
+    if (revision !== routeRevision) return;
+  }
+
+  if (S.route === 'browse') browse();
+  else if (S.route === 'trades') trades();
+  else shops();
+}
+document.addEventListener('click',async e=>{const el=e.target.closest('[data-action]');if(!el||el.disabled)return;const a=el.dataset.action;try{if(a==='flip-card'){const fs=S.selected?.faces||[];const i=(Number(el.dataset.side)+1)%fs.length;el.dataset.side=String(i);$('#detail-image').src=fs[i].image;$('#detail-card-name').textContent=fs[i].name;}else if(a==='close'){$('#detail').close();detailRevision++;}else if(a==='detail')cardDetail(el.dataset.id);else if(a==='color'){S.color=S.color===el.dataset.id?'all':el.dataset.id;S.page=1;browse();}else if(a==='clear'){S.query='';S.set=S.type=S.rarity=S.color='all';S.page=1;browse();}else if(a==='page'){S.page=Number(el.dataset.page);renderGrid();$('#archive').scrollIntoView({behavior:'smooth'});}else if(a==='new-trade')newTrade(el.dataset.have||'');else if(a==='tab'){S.tab=el.dataset.tab;trades();}else if(a==='proposal')propose(el.dataset.id);else if(a==='restore')restore();else if(a==='my-trades'){$('#detail').close();S.tab='mine';if(S.route!=='trades')location.hash='trades';else trades();}else if(a==='reload-trades')trades();else if(a==='close-trade'){if(!confirm(l('Close this trade listing?','確認關閉呢個交換帖？')))return;const k=keys().find(k=>k.id===el.dataset.id);await api(`/trades/${el.dataset.id}/close`,{token:k?.token});trades();}}catch(error){notify(error.message);}});
 $('#detail').addEventListener('click',e=>{if(e.target===$('#detail')){const r=$('#detail').getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)$('#detail').close();}});
 $('#language').onclick=()=>{lang=lang==='en'?'zh':'en';localStorage.setItem('lens-language',lang);$('#detail').close();route();};
 addEventListener('hashchange',()=>{route();window.scrollTo(0,0);});
 document.addEventListener('keydown',e=>{if(e.key==='/'&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)&&$('#search')){e.preventDefault();$('#search').focus();}});
-try{await loadConfiguration();const [raw,manifest,shopsData]=await Promise.all([fetch(assetUrl('data/catalogue.json')).then(r=>r.json()),fetch(assetUrl('data/catalogue-manifest.json')).then(r=>r.json()),fetch(assetUrl('data/shops.json')).then(r=>r.json())]);S.raw=Array.isArray(raw)?raw:raw.cards;S.manifest=manifest;S.shops=shopsData;const index=new Map();for(const c of S.raw){if(!numbers.has(c.cardNumber))numbers.set(c.cardNumber,c);const key=c.cardNumber+'|'+c.image;let group=index.get(key);if(!group){group={...c,printings:[]};index.set(key,group);groups.set(group.id,group);}group.printings.push(c);}S.cards=[...index.values()].sort((a,b)=>(/^26R/.test(b.cardNumber)?3:/^BS[0-9]/.test(b.cardNumber)?2:1)-(/^26R/.test(a.cardNumber)?3:/^BS[0-9]/.test(a.cardNumber)?2:1)||b.cardNumber.localeCompare(a.cardNumber,undefined,{numeric:true}));route();}catch(error){$('#main').innerHTML=empty(l('The archive could not load','卡庫暫時未能載入'),l('Please refresh the page to try again.','請重新整理網頁再試一次。'));console.error(error);}
+$('.skip-link').onclick = event => {
+  event.preventDefault();
+  $('#main').focus();
+};
+try {
+  await loadConfiguration();
+  await route();
+} catch (error) {
+  archiveError(error);
+}
