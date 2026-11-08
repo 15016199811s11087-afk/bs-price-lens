@@ -50,7 +50,7 @@ async function showEternalMeta() {
   main.innerHTML = `<div class="loading-screen"><span class="spinner"></span><p>${l('Loading Eternal results…', '載入永恆賽果…')}</p></div>`;
   try {
     if (!eternalSnapshot) {
-      const response = await fetch(assetUrl('data/eternal-meta.json'));
+      const response = await fetch(assetUrl('data/eternal-meta.json?v=eternal-art'), {cache: 'no-cache'});
       if (!response.ok) throw new Error('Eternal snapshot could not be loaded.');
       eternalSnapshot = await response.json();
     }
