@@ -84,7 +84,6 @@ function showcase() {
         ${art('shops', 'tile', 920, 613)}
       </section>
     </div>
-    <p class="showcase-credit">${l('AI-generated fan illustrations for BS Price Lens.', 'BS Price Lens 嘅 AI 生成像素插圖。')}</p>
   </div>`;
 }
 function filterOptions(values,chosen,label){return`<option value="all">${label}</option>`+values.map(([v,n])=>`<option value="${esc(v)}" ${v===chosen?'selected':''}>${esc(n)}</option>`).join('');}

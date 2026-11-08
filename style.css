@@ -332,14 +332,6 @@
   margin-top: auto;
   padding-top: 16px;
 }
-.showcase-credit {
-  margin: 4px 5% 0;
-  color: #62626e;
-  text-align: center;
-  font-size: .75rem;
-  line-height: 1.5;
-}
-
 @media (max-width: 720px) {
   .site-header {
     grid-template-columns: minmax(0, 1fr) auto;
