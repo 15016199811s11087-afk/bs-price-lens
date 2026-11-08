@@ -2,6 +2,12 @@
   "period": "2026-10-26 – 2026-11-01",
   "sampleSize": 67,
   "publishedDecklists": 14,
+  "artwork": {
+    "file": "eternal-2026-10-26.png",
+    "width": 2208,
+    "height": 1336,
+    "viewBox": "132 170 1072 1072"
+  },
   "archetypes": [
     {"name": "光契約", "percent": 16},
     {"name": "太陽", "percent": 10},

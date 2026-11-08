@@ -65,7 +65,7 @@ async function showEternalMeta() {
 }
 
 function renderEternalMeta(snapshot) {
-  const {period, sampleSize, publishedDecklists, archetypes} = snapshot;
+  const {period, sampleSize, publishedDecklists, archetypes, artwork} = snapshot;
   // The source prints whole percentages. Recover the nearest number of decks
   // for the slice sizes, and keep the original rounded labels in the legend.
   const rows = archetypes.map(({name, percent}) => ({
@@ -78,16 +78,34 @@ function renderEternalMeta(snapshot) {
     share: '≈' + (100 * remaining / sampleSize).toFixed(1) + '%'
   });
 
+  const center = 110;
+  const radius = 109;
+  const edge = share => {
+    const angle = 2 * Math.PI * share - Math.PI / 2;
+    return [center + radius * Math.cos(angle), center + radius * Math.sin(angle)].join(' ');
+  };
   let offset = 0;
   const slices = rows.map((row, index) => {
-    const size = 100 * row.count / sampleSize;
-    const start = offset;
+    const size = row.count / sampleSize;
+    const start = edge(offset);
     offset += size;
-    return `<circle cx="110" cy="110" r="83" pathLength="100" fill="none"
-      stroke="${metaColors[index % metaColors.length]}" stroke-width="37"
-      stroke-dasharray="${size} ${100 - size}" stroke-dashoffset="${-start}"
-      transform="rotate(-90 110 110)" data-meta-index="${index}" />`;
+    const shape = size === 1
+      ? `circle cx="${center}" cy="${center}" r="${radius}"`
+      : `path d="M ${center} ${center} L ${start} A ${radius} ${radius} 0 ${Number(size > .5)} 1 ${edge(offset)} Z"`;
+    return {shape, color: metaColors[index % metaColors.length]};
+  });
+  const fallback = slices.map(({shape, color}) => `<${shape} fill="${color}" />`).join('');
+  const controls = slices.map(({shape}, index) => {
+    return `<${shape} class="meta-slice" data-meta-index="${index}" />`;
   }).join('');
+  const picture = artwork ? `
+    <defs><clipPath id="meta-art-clip"><circle cx="${center}" cy="${center}" r="${radius}" /></clipPath></defs>
+    <g clip-path="url(#meta-art-clip)">
+      <svg width="220" height="220" viewBox="${esc(artwork.viewBox)}">
+        <image width="${esc(artwork.width)}" height="${esc(artwork.height)}"
+          href="${esc(assetUrl('assets/meta/' + artwork.file))}" />
+      </svg>
+    </g>` : '';
 
   $('#main').innerHTML = `
     <section class="page-intro">
@@ -109,18 +127,16 @@ function renderEternalMeta(snapshot) {
       <div class="meta-panel">
         <div class="meta-visual">
           <h2>${l('Share of sampled winners', '樣本內優勝佔比')}</h2>
-          <div class="meta-ring">
-            <svg viewBox="0 0 220 220" aria-hidden="true">${slices}</svg>
-            <div class="meta-selection" aria-live="polite">
-              <strong id="meta-share"></strong>
-              <span id="meta-name"></span>
-              <small id="meta-count"></small>
-            </div>
-          </div>
+          <svg class="meta-pie" viewBox="0 0 220 220" aria-hidden="true">${fallback}${picture}${controls}</svg>
           <p>${l('Select a slice or a deck name.', '點選餅圖一格，或者點牌組名稱。')}</p>
         </div>
         <div class="meta-legend">
           <h2>${l('Decks in this sample', '樣本牌組')}</h2>
+          <div class="meta-selection" aria-live="polite">
+            <strong id="meta-share"></strong>
+            <span id="meta-name"></span>
+            <small id="meta-count"></small>
+          </div>
           <div class="meta-legend-items">
             ${rows.map((row, index) => `<button type="button" class="meta-deck" data-meta-index="${index}" aria-pressed="false">
               <span class="meta-swatch" style="background:${metaColors[index % metaColors.length]}"></span>
@@ -133,7 +149,7 @@ function renderEternalMeta(snapshot) {
         <h3>${l('How to read this chart', '點樣睇呢個餅圖')}</h3>
         <p>${l('These shares show how often each deck appeared among the sampled shop tournament winners. Match win rates require the number of matches played. The source covers selected events using basic rules with at least six players, with unpublished attendance assumed to meet that threshold.', '佔比反映牌組喺呢批店賽優勝樣本出現幾多，計對局勝率要有對局總數。來源只涵蓋部分採用基本規則、至少六人參與嘅店賽，冇公布人數嘅賽事按來源假設達到門檻。')}</p>
         <p>${l('Named shares retain the screenshot’s rounded labels. Slice sizes and approximate deck counts use the 67-deck total. Unlabelled slices are grouped under Other.', '有標名嘅佔比沿用截圖嘅整數百分比。扇形大小同約數以 67 副樣本推算，冇標名嘅部分合併為「其他」。')}</p>
-        <p>${l('Source: supplied screenshot of the Eternal shop tournament winners chart for 26 October to 1 November 2026.', '來源為提供嘅《店家優勝（永恆）》截圖，統計期係 2026 年 10 月 26 日至 11 月 1 日。')}</p>
+        <p>${l('Data and slice artwork are from the supplied screenshot of the Eternal shop tournament winners chart for 26 October to 1 November 2026.', '數據同扇形卡圖取自提供嘅《店家優勝（永恆）》截圖，統計期係 2026 年 10 月 26 日至 11 月 1 日。')}</p>
       </aside>
     </section>`;
 

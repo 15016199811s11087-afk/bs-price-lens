@@ -43,22 +43,23 @@
 .meta-panel h2 { font-size: 1rem; margin: 0 0 .8rem; }
 .meta-visual { text-align: center; }
 .meta-visual p { font-size: .85rem; color: #5f516b; }
-.meta-ring { max-width: 350px; margin: auto; position: relative; }
-.meta-ring svg { width: 100%; display: block; }
-.meta-ring circle { cursor: pointer; opacity: .8; }
-.meta-ring circle:hover, .meta-ring circle.selected { opacity: 1; }
+.meta-pie { width: 100%; max-width: 460px; margin: auto; display: block; }
+.meta-slice { fill: transparent; cursor: pointer; }
+.meta-slice:hover { fill: #fff3; }
+.meta-slice.selected { stroke: white; stroke-width: 1.4; }
 .meta-selection {
-  position: absolute;
-  inset: 28% 24%;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  pointer-events: none;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: .35rem .65rem;
+  margin-bottom: .8rem;
+  padding: .65rem .85rem;
+  background: #f5effb;
+  border-radius: 10px;
 }
-.meta-selection strong { font-size: clamp(1.6rem, 4vw, 2.5rem); color: #523378; }
+.meta-selection strong { font-size: 1.55rem; color: #523378; }
 .meta-selection span { font-weight: 700; line-height: 1.2; }
-.meta-selection small { margin-top: .25rem; color: #60546c; font-size: .75rem; }
+.meta-selection small { color: #60546c; font-size: .75rem; }
 .meta-legend-items { display: grid; grid-template-columns: 1fr 1fr; gap: .45rem; }
 .meta-deck {
   display: grid;
