@@ -80,23 +80,31 @@ function renderEternalMeta(snapshot) {
 
   const center = 110;
   const radius = 109;
-  const edge = share => {
+  const point = (share, horizontalRadius, verticalRadius = horizontalRadius) => {
     const angle = 2 * Math.PI * share - Math.PI / 2;
-    return [center + radius * Math.cos(angle), center + radius * Math.sin(angle)].join(' ');
+    return [center + horizontalRadius * Math.cos(angle), center + verticalRadius * Math.sin(angle)];
   };
   let offset = 0;
   const slices = rows.map((row, index) => {
     const size = row.count / sampleSize;
-    const start = edge(offset);
+    const start = point(offset, radius).join(' ');
+    const labelPosition = point(offset + size / 2, radius + 26, radius + 33);
     offset += size;
     const shape = size === 1
       ? `circle cx="${center}" cy="${center}" r="${radius}"`
-      : `path d="M ${center} ${center} L ${start} A ${radius} ${radius} 0 ${Number(size > .5)} 1 ${edge(offset)} Z"`;
-    return {shape, color: metaColors[index % metaColors.length]};
+      : `path d="M ${center} ${center} L ${start} A ${radius} ${radius} 0 ${Number(size > .5)} 1 ${point(offset, radius).join(' ')} Z"`;
+    return {shape, labelPosition, color: metaColors[index % metaColors.length]};
   });
   const fallback = slices.map(({shape, color}) => `<${shape} fill="${color}" />`).join('');
   const controls = slices.map(({shape}, index) => {
     return `<${shape} class="meta-slice" data-meta-index="${index}" />`;
+  }).join('');
+  const labels = archetypes.map(({name}, index) => {
+    const {labelPosition: [x, y], color} = slices[index];
+    return `<g class="meta-label" transform="translate(${x} ${y})" data-meta-index="${index}" style="--slice-color:${color}">
+      <rect x="-22" y="-13" width="44" height="25" fill="transparent" />
+      <text y="-3">${esc(name)}<tspan x="0" dy="12">${esc(rows[index].share)}</tspan></text>
+    </g>`;
   }).join('');
   const picture = artwork ? `
     <defs><clipPath id="meta-art-clip"><circle cx="${center}" cy="${center}" r="${radius}" /></clipPath></defs>
@@ -127,7 +135,7 @@ function renderEternalMeta(snapshot) {
       <div class="meta-panel">
         <div class="meta-visual">
           <h2>${l('Share of sampled winners', '樣本內優勝佔比')}</h2>
-          <svg class="meta-pie" viewBox="0 0 220 220" aria-hidden="true">${fallback}${picture}${controls}</svg>
+          <svg class="meta-pie" viewBox="-48 -32 316 302" aria-hidden="true">${fallback}${picture}${controls}${labels}</svg>
           <p>${l('Select a slice or a deck name.', '點選餅圖一格，或者點牌組名稱。')}</p>
         </div>
         <div class="meta-legend">
