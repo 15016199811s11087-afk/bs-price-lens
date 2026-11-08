@@ -21,7 +21,7 @@ async function api(path,body){const r=await fetch(`${apiBase}/api${path}`,body?{
 function showDialog(html){$('#detail').innerHTML=html;if(!$('#detail').open)$('#detail').showModal();}
 const dialogTop=title=>`<div class="dialog-top"><span>${title}</span><button class="close" data-action="close" aria-label="${l('Close','關閉')}">×</button></div>`;
 function empty(title,text,action=''){return`<div class="empty"><div class="symbol">◇</div><h3>${title}</h3><p>${text}</p>${action}</div>`;}
-function nav(){document.documentElement.lang=lang==='zh'?'zh-Hant':'en';$('#language').textContent=lang==='zh'?'EN':'繁中';$('#navigation').innerHTML=[['browse',l('Card archive','卡牌圖鑑')],['trades',l('Player trades','玩家交換')],['shops',l('Shop directory','卡店指南')]].map(([id,label])=>`<a href="#${id}" class="${S.route===id?'active':''}" ${S.route===id?'aria-current="page"':''}>${label}</a>`).join('');$('#footer').innerHTML=`<div class="footer-identity"><a href="#browse" class="brand"><span class="brand-mark">◈</span><span>BS <b>Price Lens</b></span></a><div class="maker-credit"><strong>Made by issac xiao</strong><span>Design Thinking Project 2</span></div></div><p>${l('Independent student project. Card information and artwork belong to BANDAI and their respective rights holders. Shop listings are asking prices, not completed sales. Prices and availability can change; confirm with the retailer before buying.','獨立學生專題。卡牌資訊及圖片版權屬 BANDAI 及相關權利人。店舖報價為公開叫價，並非成交價；價格及庫存可能變動，購買前請向卡店確認。')}</p>`;}
+function nav(){document.documentElement.lang=lang==='zh'?'zh-Hant':'en';$('#language').textContent=lang==='zh'?'EN':'繁中';$('#navigation').innerHTML=[['browse',l('Card archive','卡牌圖鑑')],['trades',l('Player trades','玩家交換')],['meta',l('Eternal meta','永恆賽制')],['shops',l('Shop directory','卡店指南')]].map(([id,label])=>`<a href="#${id}" class="${S.route===id?'active':''}" ${S.route===id?'aria-current="page"':''}>${label}</a>`).join('');$('#footer').innerHTML=`<div class="footer-identity"><a href="#browse" class="brand"><span class="brand-mark">◈</span><span>BS <b>Price Lens</b></span></a><div class="maker-credit"><strong>Made by issac xiao</strong><span>Design Thinking Project 2</span></div></div><p>${l('Independent student project. Card information and artwork belong to BANDAI and their respective rights holders. Shop listings are asking prices, not completed sales. Prices and availability can change; confirm with the retailer before buying.','獨立學生專題。卡牌資訊及圖片版權屬 BANDAI 及相關權利人。店舖報價為公開叫價，並非成交價；價格及庫存可能變動，購買前請向卡店確認。')}</p>`;}
 function hero(){return`<section class="hero"><div class="hero-inner"><div><div class="eyebrow"><i class="live-dot"></i> BATTLE SPIRITS · HONG KONG</div><h1>${l('Your next card.<br><em>A clearer picture.</em>','搵到下一張卡。<br><em>睇清每一個報價。</em>')}</h1><p>${l('Explore the archive. Compare shop listings.<br>Give your spare cards a new home with player trades.','搜尋卡牌，睇清卡店售價同供應狀態。<br>將手上多餘嘅卡，交換成你真正想要嘅卡。')}</p><div class="hero-chips"><span>${l('HK SHOPS FIRST','香港卡店優先')}</span><span>${l('PRICES WITH SOURCES','報價附來源')}</span><span>${l('PLAYER TO PLAYER','玩家自由交換')}</span></div></div><div class="hero-art" aria-hidden="true"><img class="hero-card" src="${assetUrl('assets/cards/BS67/BS67-X01.jpg')}" alt=""><img class="hero-card" src="${assetUrl('assets/cards/BS68/BS68-CX01.jpg')}" alt=""><img class="hero-card" src="${assetUrl('assets/cards/BS67/BS67-CX01.jpg')}" alt=""><div class="hero-caption">${l('One card. More possibilities.','一張卡，更多可能。')}<b>${l('Find. Compare. Trade.','搜尋 · 比價 · 交換')}</b></div></div></div></section><div class="archive-strip"><div class="strip-stat"><strong>${Number(S.manifest.uniqueCardNumbers||numbers.size).toLocaleString()}</strong>${l('card numbers','個卡號')}</div><div class="strip-stat"><strong>${S.manifest.productCount||'—'}</strong>${l('official product lists','個官方產品分類')}</div><div class="strip-stat"><strong>HK + JP</strong>${l('shop references','店舖參考')}</div><span class="strip-note">◇ ${l('Official catalogue · Source coverage in Shop directory','官方卡庫 · 資料覆蓋詳見卡店指南')}</span></div>`;}
 function filterOptions(values,chosen,label){return`<option value="all">${label}</option>`+values.map(([v,n])=>`<option value="${esc(v)}" ${v===chosen?'selected':''}>${esc(n)}</option>`).join('');}
 function browse(){const sets=[...new Map(S.raw.map(c=>[c.set,c.setName||c.set])).entries()].sort((a,b)=>a[0].localeCompare(b[0],undefined,{numeric:true}));const ts=[...new Set(S.raw.map(c=>c.type).filter(Boolean))].map(t=>[t,typeLabel(t)]);const rs=[...new Set(S.raw.map(c=>c.rarity).filter(Boolean))].sort().map(v=>[v,v]);$('#main').innerHTML=hero()+`<section class="content" id="archive"><div class="section-head"><div><h2>${l('The card archive','卡牌圖鑑')}</h2><p>${l('Find a card number, discover an edition, check a shop.','由卡號搵卡、分辨版本，再查詢店舖報價。')}</p></div><a class="quiet-link" href="#trades">${l('Looking to swap? Explore trades','想交換？前往玩家交換')} ↗</a></div><label class="search-box"><span class="search-icon">⌕</span><input id="search" type="search" placeholder="${l('Search a card number or name, e.g. BS67-X01','輸入卡號或卡名，例如 BS67-X01')}" value="${esc(S.query)}" aria-label="${l('Search cards','搜尋卡牌')}" autocomplete="off"><span class="search-shortcut">/</span></label><div class="filter-row"><select id="set" aria-label="${l('Product series','卡牌系列')}">${filterOptions(sets.map(([s,n])=>[s,`${s} · ${n}`]),S.set,l('All series','全部系列'))}</select><select id="type" aria-label="${l('Card type','卡牌種類')}">${filterOptions(ts,S.type,l('All card types','全部卡牌種類'))}</select><select id="rarity" aria-label="${l('Rarity','稀有度')}">${filterOptions(rs,S.rarity,l('All rarities','全部稀有度'))}</select><div class="color-filters" aria-label="${l('Filter by colour','按顏色篩選')}">${Object.entries(colors).map(([c,hex])=>`<button class="color-button ${S.color===c?'active':''}" style="--c:${hex}" title="${c[0].toUpperCase()+c.slice(1)}" aria-label="${c}" aria-pressed="${S.color===c}" data-action="color" data-id="${c}"></button>`).join('')}</div><button class="clear-filter" data-action="clear">${l('Reset','重設')}</button></div><div id="results"></div></section>`;renderGrid();$('#search').addEventListener('input',e=>{S.query=e.target.value;S.page=1;renderGrid();});for(const name of['set','type','rarity'])$('#'+name).addEventListener('change',e=>{S[name]=e.target.value;S.page=1;renderGrid();});}
@@ -41,7 +41,122 @@ function newTrade(have=''){showDialog(dialogTop(l('NEW PLAYER TRADE','新增玩�
 function propose(id){const t=S.trades.find(x=>x.id===id);if(!t)return;showDialog(dialogTop(l('EXCHANGE PROPOSAL','提出交換建議'))+`<form id="proposal-form" class="dialog-form"><h2>${l('Start a conversation','同玩家傾下交換')}</h2><p>${esc(t.alias)} ${l('offers','願意交換')} ${esc(t.have)} × ${t.quantity} ${l('and is looking for','，想要')} ${esc(t.want)}. ${l('This proposal and your contact method will be visible to the listing owner.','呢個建議同你填寫嘅聯絡方式會交俾刊登者。')}</p><div class="form-grid"><label class="form-field">${l('Your display name','你嘅顯示名稱')}<input name="alias" required maxlength="40"></label><label class="form-field">${l('How the owner can contact you','刊登者可以點聯絡你')}<input name="contact" required maxlength="160" placeholder="Instagram / email / other"></label><label class="form-field full">${l('Your exchange proposal','你嘅交換建議')}<textarea name="message" required maxlength="1000" placeholder="${l('Which card and edition can you offer? Include its condition and the exchange you suggest.','你可以提供邊張卡、咩版本、卡況同建議交換方式？')}"></textarea></label></div><div class="form-error" role="alert"></div><div class="form-actions"><button type="button" class="button secondary" data-action="close">${l('Cancel','取消')}</button><button type="submit" class="button">${l('Send to listing owner','交俾刊登者')} ↗</button></div></form>`);$('#proposal-form').onsubmit=async e=>{e.preventDefault();const f=e.currentTarget;const b=$('[type=submit]',f);b.disabled=true;try{await api(`/trades/${id}/proposals`,Object.fromEntries(new FormData(f)));$('#detail').close();notify(l('Proposal delivered. The owner can contact you using the details you provided.','交換建議已送達，刊登者可以用你提供嘅方法聯絡你。'));}catch(error){$('.form-error',f).textContent=error.message;b.disabled=false;}};}
 function restore(){showDialog(dialogTop(l('RESTORE A LISTING','恢復管理交換帖'))+`<form id="restore-form" class="dialog-form"><h2>${l('Bring your listing to this browser','喺呢個瀏覽器管理交換帖')}</h2><div class="form-grid"><label class="form-field full">Listing ID<input name="id" required></label><label class="form-field full">Private management key<input name="token" required></label></div><div class="form-error" role="alert"></div><div class="form-actions"><button class="button" type="submit">${l('Restore','恢復')}</button></div></form>`);$('#restore-form').onsubmit=async e=>{e.preventDefault();const f=e.currentTarget;const k=Object.fromEntries(new FormData(f));try{const d=await api('/trades/mine',{keys:[k]});if(!d.trades.length)throw Error(l('No listing matches this key.','管理碼同交換帖編號唔相符。'));const ks=keys().filter(x=>x.id!==k.id);ks.push(k);localStorage.setItem('lens-trade-keys',JSON.stringify(ks));$('#detail').close();S.tab='mine';trades();}catch(e){$('.form-error',f).textContent=e.message;}};}
 function shops(){const sorted=S.shops.slice().sort((a,b)=>(a.region==='HK'?0:1)-(b.region==='HK'?0:1));$('#main').innerHTML=`<section class="page-intro"><div class="page-intro-inner"><div><div class="eyebrow">PRICES WITH CONTEXT</div><h1>${l('Know where a price comes from.','知道每個報價由邊度嚟。')}</h1><p>${l('Hong Kong shops first, with Japanese listings for reference. Every price links to its retailer and carries a check time.','香港卡店優先，日本報價作參考。每個價錢都附店舖連結同查詢時間。')}</p></div></div></section><section class="content"><div class="shop-grid">${sorted.map(s=>`<article class="shop-card"><div class="shop-logo">${s.region}</div><span class="region-label">${s.currency} · ${s.mode==='live'?l('PUBLIC LISTING CHECKS','公開報價查詢'):l('SHOP SEARCH LINK','店舖搜尋連結')}</span><h3 style="margin-top:14px">${esc(s.name)}</h3><p>${lang==='zh'?esc(s.description):s.mode==='search'?'Search the retailer directly. No price or stock verification is provided for this directory link.':s.region==='HK'?'Hong Kong retailer. Public product asking prices and online stock indicators are checked when you open a card.':'Japanese reference listings. Editions and card condition remain visible. Shipping and proxy fees are excluded.'}</p><a class="quiet-link" href="${esc(safeUrl(s.url))}" target="_blank" rel="noopener noreferrer">${l('Visit shop','前往卡店')} ↗</a></article>`).join('')}</div><div class="information-box"><h3>${l('Catalogue coverage','卡庫覆蓋範圍')}</h3>${l(`${Number(S.manifest.uniqueCardNumbers||numbers.size).toLocaleString()} distinct card numbers across ${S.manifest.productCount||288} official Japanese product lists. ${Number(S.manifest.totalPrintings||S.raw.length).toLocaleString()} product printings are retained, including reprints and official alternate identities. Official lists do not always distinguish every physical foil treatment.`,`${Number(S.manifest.uniqueCardNumbers||numbers.size).toLocaleString()} 個不同卡號，涵蓋 ${S.manifest.productCount||288} 個日本官方產品分類。保留 ${Number(S.manifest.totalPrintings||S.raw.length).toLocaleString()} 筆收錄資料，包括再版及官方獨立異畫。官方卡庫未必逐一列出所有實體閃卡工藝版本。`)}<br>${l('Catalogue checked','卡庫核對於')}: ${esc(when(S.manifest.checkedAt))} HKT. <a href="https://www.battlespirits.com/cardlist/" target="_blank" rel="noopener noreferrer">${l('Official catalogue','官方卡庫')} ↗</a></div><div class="information-box"><h3>${l('Reading price and stock information','點樣理解價格同庫存')}</h3>${l('A shop asking price is not a completed-sale price. Regular, SECRET, special editions and different conditions must be compared separately. “In stock” reflects the shop’s online indicator at the check time; it does not confirm shelf stock in a physical branch. If a source cannot be reached, its status stays unconfirmed. No automated authentication or guaranteed exchange value is provided.','店舖叫價並非成交價。普通版、SECRET、特別版同不同卡況需要分開比較。「有貨」反映查詢時間店舖網頁嘅供應指標，唔代表實體分店現貨。未能讀取嘅來源會標示為未確認。交換價值由雙方按版本、卡況同需要協商。')}</div></section>`;}
-function route(){const hash=location.hash.slice(1).split('/')[0];S.route=['browse','trades','shops'].includes(hash)?hash:'browse';nav();if(S.route==='browse')browse();else if(S.route==='trades')trades();else shops();}
+const metaColors = ['#7848c6', '#d96684', '#5167c7', '#16867c', '#cb7443', '#a74ba1',
+  '#496dad', '#7c853b', '#ae5c72', '#4d83a2', '#956139', '#647498', '#aab1c5'];
+let eternalSnapshot;
+
+async function showEternalMeta() {
+  const main = $('#main');
+  main.innerHTML = `<div class="loading-screen"><span class="spinner"></span><p>${l('Loading Eternal results…', '載入永恆賽果…')}</p></div>`;
+  try {
+    if (!eternalSnapshot) {
+      const response = await fetch(assetUrl('data/eternal-meta.json'));
+      if (!response.ok) throw new Error('Eternal snapshot could not be loaded.');
+      eternalSnapshot = await response.json();
+    }
+    if (S.route === 'meta') renderEternalMeta(eternalSnapshot);
+  } catch (error) {
+    if (S.route === 'meta') main.innerHTML = empty(
+      l('Eternal results are unavailable', '暫時未能載入永恆賽果'),
+      l('Refresh the page to try again.', '請重新整理網頁再試。')
+    );
+    console.error(error);
+  }
+}
+
+function renderEternalMeta(snapshot) {
+  const {period, sampleSize, publishedDecklists, archetypes} = snapshot;
+  // The source prints whole percentages. Recover the nearest number of decks
+  // for the slice sizes, and keep the original rounded labels in the legend.
+  const rows = archetypes.map(({name, percent}) => ({
+    name, count: Math.round(sampleSize * percent / 100), share: percent + '%'
+  }));
+  const remaining = sampleSize - rows.reduce((total, row) => total + row.count, 0);
+  if (remaining > 0) rows.push({
+    name: l('Other unlabelled decks', '其他未標名牌組'),
+    count: remaining,
+    share: '≈' + (100 * remaining / sampleSize).toFixed(1) + '%'
+  });
+
+  let offset = 0;
+  const slices = rows.map((row, index) => {
+    const size = 100 * row.count / sampleSize;
+    const start = offset;
+    offset += size;
+    return `<circle cx="110" cy="110" r="83" pathLength="100" fill="none"
+      stroke="${metaColors[index % metaColors.length]}" stroke-width="37"
+      stroke-dasharray="${size} ${100 - size}" stroke-dashoffset="${-start}"
+      transform="rotate(-90 110 110)" data-meta-index="${index}" />`;
+  }).join('');
+
+  $('#main').innerHTML = `
+    <section class="page-intro">
+      <div class="page-intro-inner">
+        <div>
+          <div class="eyebrow">BATTLE SPIRITS · ETERNAL</div>
+          <h1>${l('Eternal shop tournament winners', '永恆賽制店賽優勝分布')}</h1>
+          <p>${l('See which decks appeared most often among the winners in this weekly sample.', '想了解返永恆賽制嘅環境？先睇呢星期樣本入面邊幾副牌組最常優勝。')}</p>
+        </div>
+        <span class="meta-period">${esc(period)}</span>
+      </div>
+    </section>
+    <section class="content meta-content">
+      <div class="meta-stats">
+        <div><strong>${sampleSize}</strong><span>${l('Winning decks sampled', '優勝牌組樣本')}</span></div>
+        <div><strong>${publishedDecklists}</strong><span>${l('Decklists published', '公開牌表')}</span></div>
+        <div><strong>${sampleSize - publishedDecklists}</strong><span>${l('Decklists unpublished', '未公開牌表')}</span></div>
+      </div>
+      <div class="meta-panel">
+        <div class="meta-visual">
+          <h2>${l('Share of sampled winners', '樣本內優勝佔比')}</h2>
+          <div class="meta-ring">
+            <svg viewBox="0 0 220 220" aria-hidden="true">${slices}</svg>
+            <div class="meta-selection" aria-live="polite">
+              <strong id="meta-share"></strong>
+              <span id="meta-name"></span>
+              <small id="meta-count"></small>
+            </div>
+          </div>
+          <p>${l('Select a slice or a deck name.', '點選餅圖一格，或者點牌組名稱。')}</p>
+        </div>
+        <div class="meta-legend">
+          <h2>${l('Decks in this sample', '樣本牌組')}</h2>
+          <div class="meta-legend-items">
+            ${rows.map((row, index) => `<button type="button" class="meta-deck" data-meta-index="${index}" aria-pressed="false">
+              <span class="meta-swatch" style="background:${metaColors[index % metaColors.length]}"></span>
+              <span>${esc(row.name)}</span><strong>${esc(row.share)}</strong>
+            </button>`).join('')}
+          </div>
+        </div>
+      </div>
+      <aside class="information-box">
+        <h3>${l('How to read this chart', '點樣睇呢個餅圖')}</h3>
+        <p>${l('These shares show how often each deck appeared among the sampled shop tournament winners. Match win rates require the number of matches played. The source covers selected events using basic rules with at least six players, with unpublished attendance assumed to meet that threshold.', '佔比反映牌組喺呢批店賽優勝樣本出現幾多，計對局勝率要有對局總數。來源只涵蓋部分採用基本規則、至少六人參與嘅店賽，冇公布人數嘅賽事按來源假設達到門檻。')}</p>
+        <p>${l('Named shares retain the screenshot’s rounded labels. Slice sizes and approximate deck counts use the 67-deck total. Unlabelled slices are grouped under Other.', '有標名嘅佔比沿用截圖嘅整數百分比。扇形大小同約數以 67 副樣本推算，冇標名嘅部分合併為「其他」。')}</p>
+        <p>${l('Source: supplied screenshot of the Eternal shop tournament winners chart for 26 October to 1 November 2026.', '來源為提供嘅《店家優勝（永恆）》截圖，統計期係 2026 年 10 月 26 日至 11 月 1 日。')}</p>
+      </aside>
+    </section>`;
+
+  function select(index) {
+    const row = rows[index];
+    $('#meta-share').textContent = row.share;
+    $('#meta-name').textContent = row.name;
+    $('#meta-count').textContent = l(`About ${row.count} of ${sampleSize} decks`, `約 ${row.count} / ${sampleSize} 副`);
+    for (const control of document.querySelectorAll('[data-meta-index]')) {
+      const active = Number(control.dataset.metaIndex) === index;
+      control.classList.toggle('selected', active);
+      if (control.tagName === 'BUTTON') control.setAttribute('aria-pressed', String(active));
+    }
+  }
+
+  $('.meta-panel').addEventListener('click', event => {
+    const control = event.target.closest('[data-meta-index]');
+    if (control) select(Number(control.dataset.metaIndex));
+  });
+  select(0);
+}
+
+function route(){const hash=location.hash.slice(1).split('/')[0];S.route=['browse','trades','meta','shops'].includes(hash)?hash:'browse';nav();if(S.route==='browse')browse();else if(S.route==='trades')trades();else if(S.route==='meta')showEternalMeta();else shops();}
 document.addEventListener('click',async e=>{const el=e.target.closest('[data-action]');if(!el||el.disabled)return;const a=el.dataset.action;try{if(a==='flip-card'){const fs=S.selected?.faces||[];const i=(Number(el.dataset.side)+1)%fs.length;el.dataset.side=String(i);$('#detail-image').src=fs[i].image;$('#detail-card-name').textContent=fs[i].name;}else if(a==='close'){$('#detail').close();detailRevision++;}else if(a==='detail')cardDetail(el.dataset.id);else if(a==='color'){S.color=S.color===el.dataset.id?'all':el.dataset.id;S.page=1;browse();}else if(a==='clear'){S.query='';S.set=S.type=S.rarity=S.color='all';S.page=1;browse();}else if(a==='page'){S.page=Number(el.dataset.page);renderGrid();$('#archive').scrollIntoView({behavior:'smooth'});}else if(a==='new-trade')newTrade(el.dataset.have||'');else if(a==='tab'){S.tab=el.dataset.tab;trades();}else if(a==='proposal')propose(el.dataset.id);else if(a==='restore')restore();else if(a==='my-trades'){$('#detail').close();S.tab='mine';if(S.route!=='trades')location.hash='trades';else trades();}else if(a==='reload-trades')trades();else if(a==='close-trade'){if(!confirm(l('Close this trade listing?','確認關閉呢個交換帖？')))return;const k=keys().find(k=>k.id===el.dataset.id);await api(`/trades/${el.dataset.id}/close`,{token:k?.token});trades();}}catch(error){notify(error.message);}});
 $('#detail').addEventListener('click',e=>{if(e.target===$('#detail')){const r=$('#detail').getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)$('#detail').close();}});
 $('#language').onclick=()=>{lang=lang==='en'?'zh':'en';localStorage.setItem('lens-language',lang);$('#detail').close();route();};

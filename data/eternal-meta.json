@@ -1,0 +1,19 @@
+{
+  "period": "2026-10-26 – 2026-11-01",
+  "sampleSize": 67,
+  "publishedDecklists": 14,
+  "archetypes": [
+    {"name": "光契約", "percent": 16},
+    {"name": "太陽", "percent": 10},
+    {"name": "幽魔", "percent": 7},
+    {"name": "機人", "percent": 7},
+    {"name": "激霸", "percent": 6},
+    {"name": "月光", "percent": 6},
+    {"name": "紅蓮", "percent": 6},
+    {"name": "超星", "percent": 6},
+    {"name": "溶魚", "percent": 4},
+    {"name": "劍獸", "percent": 4},
+    {"name": "執契約", "percent": 3},
+    {"name": "氣兵", "percent": 3}
+  ]
+}
