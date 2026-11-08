@@ -370,3 +370,36 @@
   .showcase-actions { gap: 8px; }
   .showcase-button { padding-inline: 15px; font-size: .86rem; }
 }
+
+/* Illustrated classroom exchange */
+.trade-pair--illustrated {
+  grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr);
+  padding-bottom: 8px;
+}
+.trade-pair--illustrated .trade-dragon {
+  display: block;
+  width: min(100%, 128px);
+  height: auto;
+  aspect-ratio: 1;
+  margin: 0 auto;
+}
+.trade-dragon-name {
+  display: block;
+  margin-top: 5px;
+  color: #3c2752;
+  font-size: .8rem;
+  line-height: 1.35;
+}
+.trade-original {
+  display: inline-block;
+  margin-top: 4px;
+  color: #69439a;
+  font-size: .7rem;
+  text-underline-offset: .15em;
+}
+.trade-art-note {
+  margin: 0 0 7px;
+  color: #665774;
+  text-align: center;
+  font-size: .7rem;
+}
